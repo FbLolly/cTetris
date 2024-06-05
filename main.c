@@ -234,7 +234,7 @@ void managePiece(piece* piece, block grid[][GRIDWIDTH], int* frameCounter);
 void collidingPiece(piece* piece, block grid[][GRIDWIDTH], int* frameCounter);
 
 void printPieceOnGrid(piece* piece, block grid[][GRIDWIDTH]);
-bool collidingWithGrid(block* toCheck, block grid[][GRIDWIDTH]);
+int collidingWithGrid(block* toCheck, block grid[][GRIDWIDTH]);
 void collidingWithGridHorizontally(piece* piece, block grid[][GRIDWIDTH]);
 
 void manageInput(piece* piece, int* frameCounter);
@@ -423,9 +423,12 @@ void manageInput(piece* piece, int* frameCounter){
 
 void collidingPiece(piece* piece, block grid[][GRIDWIDTH], int* frameCounter){
     int i, ii;
+    int ret;
 
     for (i = 0; i < PIECESIZE; i++){
         for (ii = 0; ii < PIECESIZE; ii++){
+            ret = collidingWithGrid(&piece->blocks[i][ii], grid);
+
             if (piece->blocks[i][ii].rect.y >= HEIGHT-32 && !piece->blocks[i][ii].air){
                 if (!buffer){
                     *frameCounter = 0;
@@ -437,16 +440,26 @@ void collidingPiece(piece* piece, block grid[][GRIDWIDTH], int* frameCounter){
                     *frameCounter = 0;
                     buffer = false;
                 }
-            }else if (collidingWithGrid(&piece->blocks[i][ii], grid)){
-                if (!buffer){
-                    *frameCounter = 0;
-                    buffer = true;
-                }
-                
-                if (*frameCounter >= piece->speed*10){
-                    printPieceOnGrid(piece, grid);
-                    *frameCounter = 0;
-                    buffer = false;
+            }else{
+                switch (ret){
+                    case 1:
+                        if (!buffer){
+                            *frameCounter = 0;
+                            buffer = true;
+                        }
+                        
+                        if (*frameCounter >= piece->speed*10){
+                            printPieceOnGrid(piece, grid);
+                            *frameCounter = 0;
+                            buffer = false;
+                        }
+                    break;
+                    case 2:
+                        move(1, piece);
+                    break;
+                    case -2:
+                        move(-1, piece);
+                    break;
                 }
             }
         }
@@ -476,19 +489,26 @@ void printPieceOnGrid(piece* piece, block grid[][GRIDWIDTH]){
     setPiece(piece);
 }
 
-bool collidingWithGrid(block* toCheck, block grid[][GRIDWIDTH]){
+int collidingWithGrid(block* toCheck, block grid[][GRIDWIDTH]){
     int i, ii;
 
     for (i = 0; i < GRIDHEIGHT; i++){
         for (ii = 0; ii < GRIDWIDTH; ii++){
             if ((!grid[i][ii].air) && (!toCheck->air)){
                 if (toCheck->rect.y+32 == grid[i][ii].rect.y && toCheck->rect.x == grid[i][ii].rect.x)
-                    return true;
+                    return 1;
+
+                if (toCheck->rect.x == grid[i][ii].rect.x && toCheck->rect.y == grid[i][ii].rect.y){
+                    if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))
+                        return 2;
+                    else if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT))
+                        return -2;
+                }
             }
         }
     }
 
-    return false;
+    return 0;
 }
 
 
@@ -580,23 +600,7 @@ void move(int toWhere, piece* piece){
 
 
 void collidingWithGridHorizontally(piece* piece, block grid[][GRIDWIDTH]){
-    //int i, ii, iii, iv;
-//
-    //for (i = 0; i < GRIDHEIGHT; i++){
-    //    for (ii = 0; ii < GRIDWIDTH; ii++){
-    //        for (iii = 0; iii < PIECESIZE; iii++){
-    //            for (iv = 0; iv < PIECESIZE; iv++){
-    //                if (!piece->blocks[iii][iv].air && !grid[i][ii].air){
-    //                    if (piece->blocks[iii][iv].rect.x+32 == grid[i][ii].rect.x && (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))){
-    //                        move(-1, piece);
-    //                    }else if (piece->blocks[iii][iv].rect.x-32 == grid[i][ii].rect.x && (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_A))){
-    //                        move(1, piece);
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
+    //
 }
 
 
