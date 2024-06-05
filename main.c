@@ -246,6 +246,8 @@ void manageGrid(block grid[][GRIDWIDTH]);
 void move(int toWhere, piece* piece);
 void manageGameOver(block grid[][GRIDWIDTH], int* lost);
 
+void getPause(int* frameCounter, int* counter);
+
 /**/
 
 int main(){
@@ -267,19 +269,22 @@ void game(){
 
     int frameCounter = 0;
     int lost = 0; // 0 for not lost, 1 for lost, -1 for exited but not lost
+    int counter = 0;
 
     piece.speed = 5;
 
     setGrid(grid);
     setPiece(&piece);
 
-    while (!WindowShouldClose() || lost != 0){
+    while (!WindowShouldClose() && lost == 0){
         manageInput(&piece, &frameCounter);
         collidingPiece(&piece, grid, &frameCounter);
         managePiece(&piece, grid, &frameCounter);
         manageGrid(grid);
         collidingWithGridHorizontally(&piece, grid);
         manageGameOver(grid, &lost);
+
+        getPause(&frameCounter, &counter);
 
         BeginDrawing();
             ClearBackground(BLACK);
@@ -569,5 +574,20 @@ void manageGameOver(block grid[][GRIDWIDTH], int* lost){
             *lost = -1;
             return;
         }
+    }
+}
+
+
+void getPause(int* frameCounter, int* counter){
+    if (IsKeyPressed(KEY_SPACE) ){
+        if (*counter == 0){
+            *counter += 1;
+        }else{
+            *counter = 0;
+        }
+    }
+
+    if (*counter == 0){
+        *frameCounter -= 1;
     }
 }
