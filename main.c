@@ -1,10 +1,11 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "raylib.h"
 
-#define WIDTH 32*10
-#define HEIGHT 32*20
+#define WIDTH 320
+#define HEIGHT 640
 
 #define PIECESIZE 4
 
@@ -247,16 +248,39 @@ void move(int toWhere, piece* piece);
 void manageGameOver(block grid[][GRIDWIDTH], int* lost);
 
 void getPause(int* frameCounter, int* counter);
+void drawPause();
+
+/**/
+
+/*menu*/
+
+int mainMenu();
+
+int manageMenu(Rectangle* buttons);
+void drawMenu(Rectangle* buttons);
 
 /**/
 
 int main(){
+    int choice = 0;
+
     InitWindow(WIDTH, HEIGHT, "tetris");
     SetTargetFPS(60);
 
+    srand(time(NULL));
 
     while (!WindowShouldClose()){
-        game();
+        choice = mainMenu();
+
+        switch (choice) {
+            case 1:
+                game();
+            break;
+
+            case 2:
+                return 0;
+            break;
+        }
     }
 
     return 0;
@@ -269,7 +293,7 @@ void game(){
 
     int frameCounter = 0;
     int lost = 0; // 0 for not lost, 1 for lost, -1 for exited but not lost
-    int counter = 0;
+    int counter = 1;
 
     piece.speed = 5;
 
@@ -277,23 +301,33 @@ void game(){
     setPiece(&piece);
 
     while (!WindowShouldClose() && lost == 0){
-        manageInput(&piece, &frameCounter);
-        collidingPiece(&piece, grid, &frameCounter);
-        managePiece(&piece, grid, &frameCounter);
-        manageGrid(grid);
-        collidingWithGridHorizontally(&piece, grid);
-        manageGameOver(grid, &lost);
-
+        if (counter != 0){
+            manageInput(&piece, &frameCounter);
+            collidingPiece(&piece, grid, &frameCounter);
+            managePiece(&piece, grid, &frameCounter);
+            manageGrid(grid);
+            collidingWithGridHorizontally(&piece, grid);
+            manageGameOver(grid, &lost);
+        }
+        
         getPause(&frameCounter, &counter);
 
         BeginDrawing();
             ClearBackground(BLACK);
 
             drawAll(&piece, grid);
+            
+            if (counter == 0){
+                drawPause();
+            }
         EndDrawing();
 
         frameCounter++;
     }
+}
+
+void drawPause(){
+    DrawText("paused", (WIDTH/2.0)-(MeasureText("paused", 30)/2.0), HEIGHT/2.0-15, 30, LIGHTGRAY);
 }
 
 
@@ -589,5 +623,52 @@ void getPause(int* frameCounter, int* counter){
 
     if (*counter == 0){
         *frameCounter -= 1;
+    }
+}
+
+/********/
+
+
+int mainMenu(){
+    Rectangle buttons[2];
+    int toReturn = -1;
+    
+    buttons[0] = (Rectangle){(WIDTH/2.0)-125, (HEIGHT/4.0), 250, 50};
+    buttons[1] = (Rectangle){(WIDTH/2.0)-125, (HEIGHT/2.0+HEIGHT/4.0), 250, 50}; 
+
+    while (!WindowShouldClose()){
+        toReturn = manageMenu(buttons);
+
+        if (toReturn != -1)
+            return toReturn;
+
+        BeginDrawing();
+            ClearBackground(DARKGRAY);
+
+            drawMenu(buttons);
+        EndDrawing();
+    }
+
+    return -1;
+}
+
+int manageMenu(Rectangle* buttons){
+    int i;
+
+    for (i = 0; i < 2; i++){
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), buttons[i])){
+            return i+1;
+        }
+    }
+
+    return -1;
+}
+
+
+void drawMenu(Rectangle* buttons){
+    int i;
+
+    for (i = 0; i < 2; i++){
+        DrawRectangleRounded(buttons[i], 0.1, 0.0f, LIGHTGRAY);
     }
 }
