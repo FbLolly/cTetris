@@ -256,8 +256,8 @@ void drawPause();
 
 int mainMenu();
 
-int manageMenu(Rectangle* buttons);
-void drawMenu(Rectangle* buttons);
+int manageMenu(Rectangle* buttons, int* pos);
+void drawMenu(Rectangle* buttons, int* pos);
 
 /**/
 
@@ -499,7 +499,7 @@ void drawAll(piece* piece, block grid[][GRIDWIDTH]){
     for (i = 0; i < PIECESIZE; i++){
         for (ii = 0; ii < PIECESIZE; ii++){
             if (!piece->blocks[i][ii].air){
-                DrawRectangleRounded(piece->blocks[i][ii].rect, 0.2, 0.0f, piece->blocks[i][ii].color);
+                DrawRectangleRounded(piece->blocks[i][ii].rect, 0.2, 2, piece->blocks[i][ii].color);
             }
         }
     }
@@ -507,7 +507,7 @@ void drawAll(piece* piece, block grid[][GRIDWIDTH]){
     for (i = 0; i < GRIDHEIGHT; i++){
         for (ii = 0; ii < GRIDWIDTH; ii++){
             if (!grid[i][ii].air)
-                DrawRectangleRounded(grid[i][ii].rect, 0.2, 0.0f, grid[i][ii].color);
+                DrawRectangleRounded(grid[i][ii].rect, 0.2, 2, grid[i][ii].color);
         }
     }
 }
@@ -631,13 +631,14 @@ void getPause(int* frameCounter, int* counter){
 
 int mainMenu(){
     Rectangle buttons[2];
+    int pos[2] = {0};
     int toReturn = -1;
     
-    buttons[0] = (Rectangle){(WIDTH/2.0)-125, (HEIGHT/4.0), 250, 50};
-    buttons[1] = (Rectangle){(WIDTH/2.0)-125, (HEIGHT/2.0+HEIGHT/4.0), 250, 50}; 
+    buttons[0] = (Rectangle){(WIDTH/2.0)-125, (HEIGHT/4.0)+30, 250, 50};
+    buttons[1] = (Rectangle){(WIDTH/2.0)-125, (HEIGHT/2.0+HEIGHT/4.0)-70, 250, 50}; 
 
     while (!WindowShouldClose()){
-        toReturn = manageMenu(buttons);
+        toReturn = manageMenu(buttons, pos);
 
         if (toReturn != -1)
             return toReturn;
@@ -645,18 +646,26 @@ int mainMenu(){
         BeginDrawing();
             ClearBackground(DARKGRAY);
 
-            drawMenu(buttons);
+            drawMenu(buttons, pos);
         EndDrawing();
     }
 
     return -1;
 }
 
-int manageMenu(Rectangle* buttons){
+int manageMenu(Rectangle* buttons, int* pos){
     int i;
 
     for (i = 0; i < 2; i++){
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), buttons[i])){
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), buttons[i])){
+            if (pos[i] < 5){
+                pos[i] += 1;
+            }
+        }else{
+            pos[i] = 0;
+        }
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), buttons[i])){
             return i+1;
         }
     }
@@ -665,10 +674,16 @@ int manageMenu(Rectangle* buttons){
 }
 
 
-void drawMenu(Rectangle* buttons){
+void drawMenu(Rectangle* buttons, int* pos){
     int i;
 
     for (i = 0; i < 2; i++){
-        DrawRectangleRounded(buttons[i], 0.1, 0.0f, LIGHTGRAY);
+        DrawRectangleRounded((Rectangle){buttons[i].x+5, buttons[i].y+5, buttons[i].width, buttons[i].height}, 0.2, 10, BLACK);
+        
+        DrawRectangleRounded((Rectangle){buttons[i].x+pos[i], buttons[i].y+pos[i], buttons[i].width, buttons[i].height}, 0.2, 10, LIGHTGRAY);
     }
+
+    DrawText("cTetris", (WIDTH/2.0)-(MeasureText("cTetris", 40)/2.0), 50, 40, LIGHTGRAY);
+    DrawText("Play", (WIDTH/2.0)-(MeasureText("Play", 30)/2.0)+pos[0], buttons[0].y+pos[0]+10, 30, BLACK);
+    DrawText("Quit", (WIDTH/2.0)-(MeasureText("Quit", 30)/2.0)+pos[1], buttons[1].y+pos[1]+10, 30, BLACK);
 }
