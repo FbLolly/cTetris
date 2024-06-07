@@ -515,7 +515,7 @@ int collidingWithGrid(block* toCheck, block grid[][GRIDWIDTH]){
 
 void drawAll(piece* piece, block grid[][GRIDWIDTH]){
     int i, ii;
-    
+
     for (i = 0; i < PIECESIZE; i++){
         for (ii = 0; ii < PIECESIZE; ii++){
             if (!piece->blocks[i][ii].air){

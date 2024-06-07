@@ -1,0 +1,2 @@
+Fidling around with fs9 and my custom textures I found the site from ENBSeries http://boris-vorontsov.narod.ru/index_en.html . Boris Vorontsov created a special d3d9.dll for custom effects like bloom, motion blur and more. Using only bloom decreases my framerate by 2-3fps from around 45fps and all maxed out. Use is easy - copy the dll to fs9 folder, run fs9, activate with ctrl+F12 :-)! Some more screenshots on my homepage - http://members.inode.at/556895/screens/screens.htm .    
+By BORIS VORONTSOV !
