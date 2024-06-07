@@ -242,7 +242,7 @@ void manageInput(piece* piece, int* frameCounter);
 void drawAll(piece* piece, block grid[][GRIDWIDTH]);
 
 void rotatePiece(piece* piece);
-void manageGrid(block grid[][GRIDWIDTH]);
+void manageGrid(block grid[][GRIDWIDTH], int* score, int* score_times);
 
 void move(int toWhere, piece* piece);
 void manageGameOver(block grid[][GRIDWIDTH], int* lost);
@@ -295,25 +295,47 @@ void game(){
     int lost = 0; // 0 for not lost, 1 for lost, -1 for exited but not lost
     int counter = 1;
 
+    int score_times = 0;
+    int score = 0;
+
     piece.speed = 5;
 
     setGrid(grid);
     setPiece(&piece);
 
     while (!WindowShouldClose() && lost == 0){
+        score_times = 0;
         if (counter != 0){
             manageInput(&piece, &frameCounter);
             collidingPiece(&piece, grid, &frameCounter);
             managePiece(&piece, grid, &frameCounter);
-            manageGrid(grid);
+            manageGrid(grid, &score, &score_times);
             collidingWithGridHorizontally(&piece, grid);
             manageGameOver(grid, &lost);
         }
         
         getPause(&frameCounter, &counter);
 
+        if (score_times > 0){
+            switch (score_times) {
+                case 1:
+                    score += 100;
+                break;
+                case 2:
+                    score += 300;
+                break;
+                case 3:
+                    score += 500;
+                break;
+                case 4:
+                    score += 800; //tetris
+                break;
+            }
+        }
+
         BeginDrawing();
             ClearBackground(BLACK);
+            DrawText(TextFormat("%d", score), 5, 5, 30, (Color){245, 245, 245, 100});
 
             drawAll(&piece, grid);
             
@@ -553,7 +575,7 @@ void rotatePiece(piece* piece){
     }
 }
 
-void manageGrid(block grid[][GRIDWIDTH]){
+void manageGrid(block grid[][GRIDWIDTH], int* score, int* score_times){
     int i, ii, iii;
     bool full;
     block temp;
@@ -567,6 +589,8 @@ void manageGrid(block grid[][GRIDWIDTH]){
         }
 
         if (full){
+            *score_times += 1;
+
             for (ii = 0; ii < GRIDWIDTH; ii++){
                 grid[i][ii].air = true;
             }
