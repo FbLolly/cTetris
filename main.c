@@ -662,9 +662,8 @@ int manageMenu(Rectangle* buttons, int* pos){
 
     for (i = 0; i < 2; i++){
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), buttons[i])){
-            if (pos[i] < 5){
-                pos[i] += 1;
-            }
+            if (pos[i] < 5)
+                pos[i] = 5;
         }else{
             pos[i] = 0;
         }
